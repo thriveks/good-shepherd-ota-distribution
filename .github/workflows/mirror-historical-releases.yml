@@ -1,0 +1,28 @@
+name: Mirror Historical OTA Releases
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/mirror_legacy_releases.py
+      - tests/test_mirror_legacy_releases.py
+      - .github/workflows/mirror-historical-releases.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: good-shepherd-historical-ota-mirror
+  cancel-in-progress: false
+jobs:
+  mirror:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Test mirroring safeguards
+        run: python3 -m unittest discover -s tests -v
+      - name: Copy and verify legacy firmware release binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/mirror_legacy_releases.py
