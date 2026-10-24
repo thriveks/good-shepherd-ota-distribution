@@ -1,34 +1,60 @@
 name: Verify OTA Download Integrity
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/verify-download-integrity.yml
+      - approved-downloads.json
+      - tools/verify_downloads.py
+      - tests/test_verify_downloads.py
   push:
     branches: [main]
     paths:
       - .github/workflows/verify-download-integrity.yml
+      - approved-downloads.json
+      - tools/verify_downloads.py
+      - tests/test_verify_downloads.py
   schedule:
-    - cron: "21 10 * * 1"
+    - cron: "21 10 * * *"
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   public-downloads:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
-      - name: Check original asset hashes through public GitHub download URLs
-        shell: bash
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Test integrity verifier fail-closed behavior
+        run: python3 -m unittest discover -s tests -v
+      - name: Verify approved public and Render downloads and immutable releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -u tools/verify_downloads.py
+      - name: Preserve concise integrity report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ota-download-report-${{ github.run_id }}
+          path: ota-download-report.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Summarize each verified asset or failed endpoint
+        if: always()
         run: |
-          set -euo pipefail
-          base="https://github.com/thriveks/good-shepherd-ota-distribution/releases/download"
-          work="$(mktemp -d)"
-          trap 'rm -rf "$work"' EXIT
-          verify() {
-            local tag="$1" filename="$2" expected="$3"
-            curl --fail --silent --show-error --location --retry 3 --max-time 120               "$base/$tag/$filename" -o "$work/firmware.bin"
-            printf '%s  %s\n' "$expected" "$work/firmware.bin" | sha256sum --check --status
-            echo "PASS: $tag/$filename (SHA-256 verified)"
-          }
-          verify "v2.1.1-ghost-pir-test1-20261011" "good_shepherd_esp32_motion.ino.bin" "66f732c1993bccae46c072a3d98a975fdc5dcc74244a1d5e31188d289b96b8c0"
-          verify "v2.1.0-commissioning-v2-recommission-20260924" "good_shepherd_esp32_motion.ino.bin" "24d89a796035ce905aff281de17867bb4caef1750dad2f4a03d09eb04b9e345f"
-          verify "v2.4.8-recommission-20260924" "good_shepherd_esp32_human_presence.ino.bin" "869dac0a8791be3caa66d81d57adfe0e490223eb4c3cc89f5e23ed4d90bb0ff5"
-          verify "v2.4.7-recommission-20260924" "good_shepherd_esp32_human_presence.ino.bin" "d8b97e88da98d3920376ec964c75b5f9cc146562cb1e4bcf2416ac46d8d2131d"
-          verify "v1.6.6-identify-led-proof" "sketch_jun28a.ino.bin" "5844b606fdda3eba003ec72329257586cd15a8928a6d2f37bafb14b682ce9990"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          path = Path('ota-download-report.json')
+          if not path.exists():
+              raise SystemExit('Integrity report missing; inspect preceding failure')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
+              out.write('| Result | Role | Asset | Detail |\n|---|---|---|---|\n')
+              for row in json.loads(path.read_text()):
+                  detail = row.get('error', 'Public/proxy bytes, SHA-256, header and immutability verified')
+                  if 'checking_url' in row:
+                      detail += ': ' + row['checking_url']
+                  out.write(f"| {row['status']} | {row['role']} | {row['asset']} | {detail} |\n")
+          PY
