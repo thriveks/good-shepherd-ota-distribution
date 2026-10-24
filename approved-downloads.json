@@ -1,0 +1,62 @@
+[
+  {
+    "role": "motion-active",
+    "family": "motion",
+    "tag": "v2.1.1-ghost-pir-test1-20261011",
+    "filename": "good_shepherd_esp32_motion.ino.bin",
+    "sha256": "66f732c1993bccae46c072a3d98a975fdc5dcc74244a1d5e31188d289b96b8c0",
+    "version": "esp32-good-shepherd-motion-v2.1.1-ghost-pir-test1"
+  },
+  {
+    "role": "motion-rollback",
+    "family": "motion",
+    "tag": "v2.1.0-commissioning-v2-recommission-20260924",
+    "filename": "good_shepherd_esp32_motion.ino.bin",
+    "sha256": "24d89a796035ce905aff281de17867bb4caef1750dad2f4a03d09eb04b9e345f",
+    "version": "esp32-good-shepherd-motion-v2.1.0-commissioning-v2"
+  },
+  {
+    "role": "human-presence-active",
+    "family": "human-presence",
+    "tag": "v2.4.8-recommission-20260924",
+    "filename": "good_shepherd_esp32_human_presence.ino.bin",
+    "sha256": "869dac0a8791be3caa66d81d57adfe0e490223eb4c3cc89f5e23ed4d90bb0ff5",
+    "version": "esp32-good-shepherd-human-presence-v2.4.8-recommission-v1"
+  },
+  {
+    "role": "human-presence-rollback",
+    "family": "human-presence",
+    "tag": "v2.4.7-recommission-20260924",
+    "filename": "good_shepherd_esp32_human_presence.ino.bin",
+    "sha256": "d8b97e88da98d3920376ec964c75b5f9cc146562cb1e4bcf2416ac46d8d2131d",
+    "version": "esp32-good-shepherd-human-presence-v2.4.7-adaptive-capture-v1"
+  },
+  {
+    "role": "historical-motion",
+    "family": "motion",
+    "tag": "v1.6.6-identify-led-proof",
+    "filename": "sketch_jun28a.ino.bin",
+    "sha256": "5844b606fdda3eba003ec72329257586cd15a8928a6d2f37bafb14b682ce9990"
+  },
+  {
+    "role": "historical-motion",
+    "family": "motion",
+    "tag": "v1.7.1",
+    "filename": "good_shepherd_esp32_motion.ino.bin",
+    "sha256": "dcc244016fd65499d6205bf2fac9fcb04cdc3278ad4ad237d59cdcc55bbab678"
+  },
+  {
+    "role": "historical-motion",
+    "family": "motion",
+    "tag": "v1.7.5",
+    "filename": "good_shepherd_esp32_motion.ino.bin",
+    "sha256": "ccdc3c14a8d296825fa52c5e85683d69a496c2fc231a51cd21b0e448ba096dd9"
+  },
+  {
+    "role": "historical-motion",
+    "family": "motion",
+    "tag": "v1.8.4-priority-events-best-effort-telemetry",
+    "filename": "good_shepherd_esp32_motion.ino.bin",
+    "sha256": "24ee705897467c56b070a02d9c4309ced6bb4d44a7f4eb8208f54a8b91595271"
+  }
+]
