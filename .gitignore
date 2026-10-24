@@ -1,0 +1,11 @@
+*.ino
+*.cpp
+*.h
+*.pem
+*.key
+.env*
+*.elf
+*.map
+__pycache__/
+*.pyc
+*.bin
