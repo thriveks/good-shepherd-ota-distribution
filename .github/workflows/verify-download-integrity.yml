@@ -1,0 +1,34 @@
+name: Verify OTA Download Integrity
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/verify-download-integrity.yml
+  schedule:
+    - cron: "21 10 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-downloads:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check original asset hashes through public GitHub download URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://github.com/thriveks/good-shepherd-ota-distribution/releases/download"
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
+          verify() {
+            local tag="$1" filename="$2" expected="$3"
+            curl --fail --silent --show-error --location --retry 3 --max-time 120               "$base/$tag/$filename" -o "$work/firmware.bin"
+            printf '%s  %s\n' "$expected" "$work/firmware.bin" | sha256sum --check --status
+            echo "PASS: $tag/$filename (SHA-256 verified)"
+          }
+          verify "v2.1.1-ghost-pir-test1-20261011" "good_shepherd_esp32_motion.ino.bin" "66f732c1993bccae46c072a3d98a975fdc5dcc74244a1d5e31188d289b96b8c0"
+          verify "v2.1.0-commissioning-v2-recommission-20260924" "good_shepherd_esp32_motion.ino.bin" "24d89a796035ce905aff281de17867bb4caef1750dad2f4a03d09eb04b9e345f"
+          verify "v2.4.8-recommission-20260924" "good_shepherd_esp32_human_presence.ino.bin" "869dac0a8791be3caa66d81d57adfe0e490223eb4c3cc89f5e23ed4d90bb0ff5"
+          verify "v2.4.7-recommission-20260924" "good_shepherd_esp32_human_presence.ino.bin" "d8b97e88da98d3920376ec964c75b5f9cc146562cb1e4bcf2416ac46d8d2131d"
+          verify "v1.6.6-identify-led-proof" "sketch_jun28a.ino.bin" "5844b606fdda3eba003ec72329257586cd15a8928a6d2f37bafb14b682ce9990"
